@@ -1,38 +1,53 @@
 package edu.escuelaing.arsw;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import org.junit.jupiter.api.Test;
+
+import edu.escuelaing.arsw.herokufirstwebapp.HttpClient;
+import edu.escuelaing.arsw.herokufirstwebapp.HttpServer;
 
 /**
  * Unit test for simple App.
  */
-public class AppTest 
-    extends TestCase
-{
-    /**
-     * Create the test case
-     *
-     * @param testName name of the test case
-     */
-    public AppTest( String testName )
-    {
-        super( testName );
-    }
+public class AppTest {
+    @Test
+    public void RecibePeticionesConcurrentes() {
+        String[] args = { "index.html" };
+        ExecutorService pool = Executors.newFixedThreadPool(102);
+        pool.submit(() -> {
+            try {
+                HttpServer.main(args);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        });
 
-    /**
-     * @return the suite of tests being tested
-     */
-    public static Test suite()
-    {
-        return new TestSuite( AppTest.class );
-    }
-
-    /**
-     * Rigourous Test :-)
-     */
-    public void testApp()
-    {
-        assertTrue( true );
+        for (int i = 0; i < 100; i++) {
+            pool.submit(() -> {
+                try {
+                    HttpClient.main(args);
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                    assertFalse(false);
+                }
+            });
+        }
+        args[0] = "bye";
+        pool.submit(() -> {
+            try {
+                HttpClient.main(args);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+                assertFalse(false);
+            }
+        });
+        pool.shutdown();
+        assertTrue(true);
     }
 }
