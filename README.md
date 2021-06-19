@@ -1,6 +1,5 @@
-# Picas y fijas
-Programa que simula el juego de picas y fijas, desplegado en heroku.
-Usa tecnologias como Spring Boot
+# Heroku web server
+Programa que permite hacer multiples solicitudes manejando hilos y pool Executors
 
 [Heroku](https://glacial-garden-13520.herokuapp.com/)
 
